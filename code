@@ -1,0 +1,67 @@
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+import matplotlib.pyplot as plt
+import seaborn as sn
+
+# Use keras.datasets.mnist.load_data() to use handwritten dataset from keras
+(X_train, y_train), (X_test, y_test) = keras.datasets.mnist.load_data() 
+
+# abc = X_train[0].shape # T0 print the shape of of test data (print(28,28) it means every data is of 28 by 28 pixel image)
+# plt.matshow(X_train[0]) # Print the first image
+# print(y_train[0])       # print the first train value
+# print(y_train[:5])     #print the first five train values
+# print(X_train.shape)
+
+X_train = X_train / 255
+X_test = X_test / 255
+
+X_train_flatten = X_train.reshape(len(X_train),28*28) #flatten X_train data
+# print(X_train_flatten.shape)  #print flatten vale of X train data 
+
+X_test_flatten = X_test.reshape(len(X_test),28*28) #flatten X_test data
+# print(X_test_flatten.shape) #print flatten vale of X test data 
+
+# print(X_train[0])       # print the first image in grid or matrix of 2D 
+#print(X_train_flatten[0])    #print the first image grid or matrix in 1D
+
+# #without HIDDEN LAYER 
+# model1 = keras.Sequential([
+#     keras.layers.Dense(10, input_shape=(784,), activation='sigmoid')
+# ])
+
+
+#. WITH HIDDEN LAYER 
+model1 = keras.Sequential([
+    keras.layers.Dense(100, input_shape=(784,), activation='relu'),
+    keras.layers.Dense(10, activation='sigmoid')
+])
+
+
+
+
+model1.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
+model1.fit(X_train_flatten, y_train, epochs=5)
+print()
+print()
+model1.evaluate(X_test_flatten, y_test)
+
+plt.matshow(X_test[1])  # To show image of Digit 
+
+y_predicted = model1.predict(X_test_flatten)
+print("The image is of digit :", np.argmax(y_predicted[1])) # To display the digit
+
+
+y_predicted_labels = [np.argmax(i) for i in y_predicted]
+print(y_predicted_labels[:5])
+
+# confusion_matrix = tf.math.confusion_matrix(labels = y_test , predictions = y_predicted_labels) # To print the matrix on confusion matrix
+# print(confusion_matrix)
+
+plt.figure(figsize=(10,7))
+sn.heatmap(confusion_matrix , annot = True , fmt = 'd')
+plt.xlabel('predicted')
+plt.ylabel('truth')
