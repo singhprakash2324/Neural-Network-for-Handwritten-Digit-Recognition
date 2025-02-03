@@ -4,64 +4,127 @@ from tensorflow import keras
 import matplotlib.pyplot as plt
 import seaborn as sn
 
-# Use keras.datasets.mnist.load_data() to use handwritten dataset from keras
-(X_train, y_train), (X_test, y_test) = keras.datasets.mnist.load_data() 
+# Load the MNIST handwritten digits dataset
+(X_train, y_train), (X_test, y_test) = keras.datasets.mnist.load_data()
 
-# abc = X_train[0].shape # T0 print the shape of of test data (print(28,28) it means every data is of 28 by 28 pixel image)
-# plt.matshow(X_train[0]) # Print the first image
-# print(y_train[0])       # print the first train value
-# print(y_train[:5])     #print the first five train values
-# print(X_train.shape)
+# Normalize pixel values (scale between 0 and 1)
+X_train = X_train / 255.0
+X_test = X_test / 255.0
 
-X_train = X_train / 255
-X_test = X_test / 255
+# Flatten images (28x28 -> 784) to make them suitable for a dense neural network
+X_train_flatten = X_train.reshape(len(X_train), 28 * 28)
+X_test_flatten = X_test.reshape(len(X_test), 28 * 28)
 
-X_train_flatten = X_train.reshape(len(X_train),28*28) #flatten X_train data
-# print(X_train_flatten.shape)  #print flatten vale of X train data 
-
-X_test_flatten = X_test.reshape(len(X_test),28*28) #flatten X_test data
-# print(X_test_flatten.shape) #print flatten vale of X test data 
-
-# print(X_train[0])       # print the first image in grid or matrix of 2D 
-#print(X_train_flatten[0])    #print the first image grid or matrix in 1D
-
-# #without HIDDEN LAYER 
-# model1 = keras.Sequential([
-#     keras.layers.Dense(10, input_shape=(784,), activation='sigmoid')
-# ])
-
-
-#. WITH HIDDEN LAYER 
-model1 = keras.Sequential([
-    keras.layers.Dense(100, input_shape=(784,), activation='relu'),
-    keras.layers.Dense(10, activation='sigmoid')
+# Define the neural network model with a hidden layer
+model = keras.Sequential([
+    keras.layers.Dense(100, input_shape=(784,), activation='relu'),  # Hidden layer with 100 neurons
+    keras.layers.Dense(10, activation='softmax')  # Output layer with 10 neurons (digits 0-9)
 ])
 
-
-
-
-model1.compile(optimizer='adam',
+# Compile the model
+model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
 
-model1.fit(X_train_flatten, y_train, epochs=5)
-print()
-print()
-model1.evaluate(X_test_flatten, y_test)
+# Train the model
+model.fit(X_train_flatten, y_train, epochs=5, verbose=1)
 
-plt.matshow(X_test[1])  # To show image of Digit 
+# Evaluate model performance on test data
+print("\nModel Evaluation:")
+model.evaluate(X_test_flatten, y_test)
+
+# Display an example test image
+plt.matshow(X_test[2])  # Show image of a digit from test set
+plt.title("Sample Test Image")
+plt.show()
+
+# Predict on test data
+y_predicted = model.predict(X_test_flatten)
+y_predicted_labels = [np.argmax(i) for i in y_predicted]
 
 y_predicted = model1.predict(X_test_flatten)
-print("The image is of digit :", np.argmax(y_predicted[1])) # To display the digit
+print("The image is of digit :", np.argmax(y_predicted[2])) # To display the digit
 
+# Print first 5 predicted labels
+print("Predicted labels for first 5 test images:", y_predicted_labels[:5])
 
+# Generate the confusion matrix
+confusion_matrix = tf.math.confusion_matrix(labels=y_test, predictions=y_predicted_labels)
+
+# Plot the confusion matrix as a heatmap
+plt.figure(figsize=(10, 7))
+sn.heatmap(confusion_matrix, annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title("Confusion Matrix")
+plt.show()
+
+# Display model summary
+model.summary()
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+import matplotlib.pyplot as plt
+import seaborn as sn
+
+# Load the MNIST handwritten digits dataset
+(X_train, y_train), (X_test, y_test) = keras.datasets.mnist.load_data()
+
+# Normalize pixel values (scale between 0 and 1)
+X_train = X_train / 255.0
+X_test = X_test / 255.0
+
+# Flatten images (28x28 -> 784) to make them suitable for a dense neural network
+X_train_flatten = X_train.reshape(len(X_train), 28 * 28)
+X_test_flatten = X_test.reshape(len(X_test), 28 * 28)
+
+# Define the neural network model with a hidden layer
+model = keras.Sequential([
+    keras.layers.Dense(100, input_shape=(784,), activation='relu'),  # Hidden layer with 100 neurons
+    keras.layers.Dense(10, activation='softmax')  # Output layer with 10 neurons (digits 0-9)
+])
+
+# Compile the model
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
+# Train the model
+model.fit(X_train_flatten, y_train, epochs=5, verbose=1)
+
+# Evaluate model performance on test data
+print("\nModel Evaluation:")
+model.evaluate(X_test_flatten, y_test)
+
+# Display an example test image
+plt.matshow(X_test[2])  # Show image of a digit from test set
+plt.title("Sample Test Image")
+plt.show()
+
+# Predict on test data
+y_predicted = model.predict(X_test_flatten)
 y_predicted_labels = [np.argmax(i) for i in y_predicted]
-print(y_predicted_labels[:5])
 
-# confusion_matrix = tf.math.confusion_matrix(labels = y_test , predictions = y_predicted_labels) # To print the matrix on confusion matrix
-# print(confusion_matrix)
+#y_predicted = model1.predict(X_test_flatten) #model1 is not defined
+print("The image is of digit :", np.argmax(y_predicted[2])) # To display the digit
 
-plt.figure(figsize=(10,7))
-sn.heatmap(confusion_matrix , annot = True , fmt = 'd')
-plt.xlabel('predicted')
-plt.ylabel('truth')
+# Print first 5 predicted labels
+print("Predicted labels for first 5 test images:", y_predicted_labels[:5])
+
+# Generate the confusion matrix
+confusion_matrix = tf.math.confusion_matrix(labels=y_test, predictions=y_predicted_labels)
+
+# Plot the confusion matrix as a heatmap
+plt.figure(figsize=(10, 7))
+sn.heatmap(confusion_matrix, annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title("Confusion Matrix")
+plt.show()
+
+# Display model summary
+model.summary()
+
+# Print actual vs predicted values
+for i in range(1,20): # range(1:20) is invalid, should be range(1,20)
+    print(f"Actual: {y_test[i]} - Predicted: {np.argmax(y_predicted[i])}") #y_predicted contains probabilities, not labels
